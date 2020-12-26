@@ -1,0 +1,13 @@
+type: code
+files:
+- name: src/Main.kt
+  visible: true
+  text: // Do not declare variables captainJackSparrow and pirateJackSparrow! They
+    already exist.
+  learner_created: false
+feedback_link: https://hyperskill.org/learn/step/11243#comment
+status: Solved
+feedback:
+  message: <html>Correct solution</html>
+  time: Thu, 24 Dec 2020 07:10:08 UTC
+record: -1

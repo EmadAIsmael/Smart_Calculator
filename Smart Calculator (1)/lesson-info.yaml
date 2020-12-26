@@ -1,0 +1,12 @@
+type: framework
+custom_name: Smart Calculator
+content:
+- 2+2
+- 2+2+
+- Count them all
+- Add subtractions
+- Error!
+- Variables
+- I’ve got the power
+- Very big
+current_task: 3

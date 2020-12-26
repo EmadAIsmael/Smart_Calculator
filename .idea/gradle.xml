@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="delegatedBuild" value="false" />
+        <option name="testRunner" value="GRADLE" />
+        <option name="distributionType" value="WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleJvm" value="#JAVA_INTERNAL" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/Problems (1)/Referential equality" />
+            <option value="$PROJECT_DIR$/Problems (10)/Handle string exception" />
+            <option value="$PROJECT_DIR$/Problems (11)/Handling strings" />
+            <option value="$PROJECT_DIR$/Problems (12)/Handle number format exception" />
+            <option value="$PROJECT_DIR$/Problems (13)/Integer division" />
+            <option value="$PROJECT_DIR$/Problems (14)/Converter to Double" />
+            <option value="$PROJECT_DIR$/Problems (15)/National assembly" />
+            <option value="$PROJECT_DIR$/Problems (16)/Different colo(u)rs" />
+            <option value="$PROJECT_DIR$/Problems (17)/Help the teacher" />
+            <option value="$PROJECT_DIR$/Problems (2)/Kings of Sweden" />
+            <option value="$PROJECT_DIR$/Problems (3)/Concatenate 3 strings with separator" />
+            <option value="$PROJECT_DIR$/Problems (4)/Gratuity" />
+            <option value="$PROJECT_DIR$/Problems (5)/Print Username" />
+            <option value="$PROJECT_DIR$/Problems (6)/Rickrolling" />
+            <option value="$PROJECT_DIR$/Problems (7)/What's wrong?" />
+            <option value="$PROJECT_DIR$/Problems (8)/Fix the program" />
+            <option value="$PROJECT_DIR$/Problems (9)/Handle arithmetic exception" />
+            <option value="$PROJECT_DIR$/Problems/Compression algorithm" />
+            <option value="$PROJECT_DIR$/Problems/Convert a date" />
+            <option value="$PROJECT_DIR$/Problems/Create a euphonious word" />
+            <option value="$PROJECT_DIR$/Problems/Cutting out the middle of a string" />
+            <option value="$PROJECT_DIR$/Problems/Double characters" />
+            <option value="$PROJECT_DIR$/Problems/Find the first occurrence of the word &quot;the&quot;" />
+            <option value="$PROJECT_DIR$/Problems/Generating passwords" />
+            <option value="$PROJECT_DIR$/Problems/Harry Potter" />
+            <option value="$PROJECT_DIR$/Problems/Lucky number" />
+            <option value="$PROJECT_DIR$/Problems/Move the first N characters" />
+            <option value="$PROJECT_DIR$/Problems/Number of occurrences" />
+            <option value="$PROJECT_DIR$/Problems/Palindrome" />
+            <option value="$PROJECT_DIR$/Problems/Parse url" />
+            <option value="$PROJECT_DIR$/Problems/Piece of alphabet" />
+            <option value="$PROJECT_DIR$/Problems/Shape" />
+            <option value="$PROJECT_DIR$/Problems/The longest word" />
+            <option value="$PROJECT_DIR$/Problems/The lucky ticket" />
+            <option value="$PROJECT_DIR$/Problems/The percentage of G and C characters" />
+            <option value="$PROJECT_DIR$/Smart Calculator (1)/task" />
+            <option value="$PROJECT_DIR$/Smart Calculator (2)/task" />
+            <option value="$PROJECT_DIR$/Smart Calculator/task" />
+            <option value="$PROJECT_DIR$/util" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>
