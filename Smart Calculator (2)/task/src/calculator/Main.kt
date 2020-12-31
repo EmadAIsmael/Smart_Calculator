@@ -8,7 +8,7 @@ val vars = mutableMapOf<String, Int?>()
 fun main() {
 
     while (true) {
-        val input = readLine()!!
+        val input = readLine()!!.trim()
         if (input.isNotEmpty()) {
             when {
                 isCommand(input) -> {
@@ -178,18 +178,12 @@ fun evaluatePostfix(postfix: String): Int? {
 fun isOperator(op: String): Boolean = "+-/*^".contains(op)
 
 fun tokenToVal(token: String): Int {
-//    var newToken = ""
+
     if (token.startsWith("-")) {
         val newToken = token.substring(token.indexOf('-') + 1)
         return if (isValidVar(newToken)) -1 * vars[newToken]!! else -1 * newToken.toInt()
     }
-//    return if (isValidVar(token)) vars[token] else token.toInt()
-//    return if (isValidVar(token))
-//        vars[token]!!
-//    else if (isValidIdentifier(token))
-//        throw UnknownVariableException()
-//    else
-//        token.toInt()
+
     return when {
         isValidVar(token) -> vars[token]!!
         isValidIdentifier(token) -> throw UnknownVariableException()
@@ -220,7 +214,38 @@ fun doCommand(cmd: String) {
             exitProcess(0)
         }
         "/help" -> {
-            println("The program calculates the sum/difference of numbers")
+            val helpMessage = """
+                Smart Calculator Help:
+                
+                the calculator uses basic arithmetic operations: 
+                Add, Subtract, Multiply, Divide, and Power
+                you can use + - * / ^ for the respective operations.
+                
+                 e.g. 
+                 Enter the following expression at the propmt,
+                 and press the ENTER key to display the expression result.
+                  
+                 3 + 4 * 12 / (6 - 2) ^ 2
+                 
+                 You can also define variables and store values in them.
+                 
+                 e.g. 
+                 a = 5
+                 b = 7
+                 c = a
+                 
+                 Enter the name of the variable and press ENTER
+                 to diplay the value of the variable:
+                 a
+                 5
+                 
+                 Enter the following commands for respective actions:
+                 /help      to display this help screen
+                 /listvars  to display defined variables
+                 /exit      to exit the calculator
+                 
+            """.trimIndent()
+            println(helpMessage)
         }
         "/listvars" -> {
             for ((k, v) in vars) {
