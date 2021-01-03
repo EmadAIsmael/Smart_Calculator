@@ -2,8 +2,9 @@ package calculator
 
 import kotlin.math.pow
 import kotlin.system.exitProcess
+import java.math.BigInteger
 
-val vars = mutableMapOf<String, Int?>()
+val vars = mutableMapOf<String, BigInteger?>()
 
 fun main() {
 
@@ -58,7 +59,7 @@ fun isValidOneTerm(inputString: String): Boolean {
     return inputString.matches(validOneValue)
 }
 
-fun evaluate(inputString: String): Int? {
+fun evaluate(inputString: String): BigInteger? {
     // handle multiple +'s and / or -'s
     val oPlus = "\\+{2,}".toRegex()
     val oMinus = "-{2,}".toRegex()
@@ -71,7 +72,11 @@ fun evaluate(inputString: String): Int? {
     if ("""[/^*]{2,}""".toRegex().containsMatchIn(tokensString))
         throw InvalidExpressionException()
 
-    val postfix = toPostfix(tokensString)       // param was inputString
+    // handle number with spaces
+    if ("""\d+\s+\d+""".toRegex().containsMatchIn(tokensString))
+        throw InvalidExpressionException()
+
+    val postfix = toPostfix(tokensString)
 
     if (postfix.contains("("))
         throw InvalidExpressionException()
@@ -79,33 +84,26 @@ fun evaluate(inputString: String): Int? {
     return evaluatePostfix(postfix)
 }
 
-fun toPostfix(input: String): String {
+fun toPostfix(input: String): Queue {
     val opStack = Stack()
-    var result = ""
-
-    var tokensString = input
-    tokensString.replace(" ", "")
-
-    // delimit tokens with spaces
-    val opRegex = """[-+*/^()]""".toRegex()
-    tokensString = opRegex.replace(tokensString) { m -> " ${m.value} " }
+    val result = Queue()
 
     // tokenize
-    val tokens = tokensString
-        .split("\\s".toRegex()).toMutableList()
-        .filter { it.isNotEmpty() }
+    val tokenizer = MathExpressionTokenizer()
+    val tokens = tokenizer.tokenize(input)
 
     // process expression
     for (token in tokens) {
         // number or variable, add to result
         if (isValidOneTerm(token) || isValidVar(token))
             try {
-                result += tokenToVal(token).toString() + " "
+                result.enqueue(tokenToVal(token).toString())
             } catch (e: UnknownVariableException) {
                 println(e.message)
             }
 
-        // stack is empty or stack top == "(", push operator to stack
+        // stack is empty or stack top == "(";
+        // push operator to stack
         else if (isOperator(token)) {
             if (opStack.isEmpty() || opStack.peek() == "(")
                 opStack.push(token)
@@ -114,7 +112,8 @@ fun toPostfix(input: String): String {
                 Operator.findBySymbol(opStack.peek().toString()).precedence
             )
                 opStack.push(token)
-            // incoming operator has lower or equal precedence compared to the top of the stack
+            // incoming operator has lower or equal precedence
+            // compared to the top of the stack
             else if (Operator.findBySymbol(token).precedence <=
                 Operator.findBySymbol(opStack.peek().toString()).precedence
             ) {
@@ -123,71 +122,73 @@ fun toPostfix(input: String): String {
                                     Operator.findBySymbol(opStack.peek().toString()).precedence) &&
                                     opStack.peek() != "(")
                 ) {
-                    result += opStack.pop() + " "
+                    result.enqueue(opStack.pop().toString())
                 }
-                // if (opStack.peek() == "(") opStack.pop()
+
                 opStack.push(token)
             }
         }
-        // incoming element is a left parenthesis, push it on the stack
+        // incoming element is a left parenthesis;
+        // push it on the stack
         else if (token == "(") opStack.push(token)
-        // incoming element is a right parenthesis,
+        // incoming element is a right parenthesis;
         // pop the stack and add operators to the result until you see
-        // a left parenthesis. Discard the pair of parentheses
+        // a left parenthesis.
+        // Discard the pair of parentheses
         else if (token == ")") {
             while (opStack.isNotEmpty() && opStack.peek() != "(")
-                result += opStack.pop() + " "
+                result.enqueue(opStack.pop().toString())
             if (opStack.peek() == "(") opStack.pop()               // discard "("
             else
                 throw InvalidExpressionException()
         }
     }
-    // expression is empty, pop all operator and add to result
+    // expression is empty;
+    // pop all operator and add to result
     while (opStack.isNotEmpty())
-        result += opStack.pop() + " "
+        result.enqueue(opStack.pop().toString())
 
     return result
 }
 
-fun evaluatePostfix(postfix: String): Int? {
+fun evaluatePostfix(postfix: Queue): BigInteger? {
     val calcStack = Stack()
-    val pfTokens = postfix.split(" ").filter { it.isNotEmpty() }
 
-    for (token in pfTokens) {
-        if (isValidOneTerm(token) || isValidVar(token))
+    while(postfix.isNotEmpty()) {
+        val token = postfix.dequeue()
+        if (isValidOneTerm(token.toString()) || isValidVar(token.toString()))
             try {
-                calcStack.push(tokenToVal(token).toString())
+                calcStack.push(tokenToVal(token.toString()).toString())
             } catch (e: UnknownVariableException) {
                 println(e.message)
             }
+        else if (isOperator(token.toString())) {
+            val opObj = Operator.findBySymbol(token.toString())
+            val a = calcStack.pop()?.toBigInteger()
+            val b = calcStack.pop()?.toBigInteger()
 
-        else if (isOperator(token)) {
-            val opObj = Operator.findBySymbol(token)
-            val a = calcStack.pop()?.toInt()
-            val b = calcStack.pop()?.toInt()
-
-            var result = 0
+            var result = 0.toBigInteger()
             if (a != null && b != null)
                 result = opObj.method.invoke(b, a)
             calcStack.push(result.toString())
         }
     }
-    return calcStack.pop()?.toInt()
+    return calcStack.pop()?.toBigInteger()
 }
 
 fun isOperator(op: String): Boolean = "+-/*^".contains(op)
 
-fun tokenToVal(token: String): Int {
+fun tokenToVal(token: String): BigInteger {
 
     if (token.startsWith("-")) {
         val newToken = token.substring(token.indexOf('-') + 1)
-        return if (isValidVar(newToken)) -1 * vars[newToken]!! else -1 * newToken.toInt()
+        return if (isValidVar(newToken)) -1.toBigInteger() * vars[newToken]!! else -1.toBigInteger() * newToken.toBigInteger()
     }
 
     return when {
         isValidVar(token) -> vars[token]!!
         isValidIdentifier(token) -> throw UnknownVariableException()
-        else -> token.toInt()
+        else -> token.toBigInteger()
     }
 }
 
@@ -196,10 +197,11 @@ fun isAssignment(input: String): Boolean {
 }
 
 fun isExpression(input: String): Boolean {
-    val op = "[-+/*^]+"
-    val expr = "^(\\w+)(\\s*$op\\s*\\w+)*$"
-    val withoutParenthesis = input.replace("[()]".toRegex(), "")
-    return withoutParenthesis.matches(expr.toRegex())
+//    val op = "[-+/*^]+"
+//    val expr = "^(\\w+)(\\s*$op\\s*\\w+)*$"
+//    val withoutParenthesis = input.replace("[()]".toRegex(), "")
+//    return withoutParenthesis.matches(expr.toRegex())
+    return """[-+*/^()a-zA-Z0-9]""".toRegex().containsMatchIn(input)
 }
 
 fun isCommand(cmd: String): Boolean {
@@ -222,7 +224,7 @@ fun doCommand(cmd: String) {
                 you can use + - * / ^ for the respective operations.
                 
                  e.g. 
-                 Enter the following expression at the propmt,
+                 Enter the following expression at the prompt,
                  and press the ENTER key to display the expression result.
                   
                  3 + 4 * 12 / (6 - 2) ^ 2
@@ -235,7 +237,7 @@ fun doCommand(cmd: String) {
                  c = a
                  
                  Enter the name of the variable and press ENTER
-                 to diplay the value of the variable:
+                 to display the value of the variable:
                  a
                  5
                  
@@ -264,7 +266,7 @@ fun isValidVar(identifier: String): Boolean {
     return vars.containsKey(identifier)
 }
 
-fun doAssignment(input: String) {
+fun doAssignment(input: String): BigInteger? {
     val (identifier, rValue) = input.split("=").map { it.trim() }
 
     if (hasMultipleAssignments(input))
@@ -282,7 +284,9 @@ fun doAssignment(input: String) {
     if (isValidVar(rValue))
         vars[identifier] = vars[rValue]
     else
-        vars[identifier] = rValue.toInt()
+        vars[identifier] = rValue.toBigInteger()
+
+    return vars[identifier]
 }
 
 fun isAllNumeric(input: String): Boolean {
@@ -351,19 +355,35 @@ class Queue {
     fun isNotEmpty(): Boolean {
         return !this.isEmpty()
     }
+
+    fun contains(item: String): Boolean {
+        val q = Queue()
+        var isFound = false
+        while (this.isNotEmpty()) {
+            val x = this.dequeue()
+            q.enqueue(x.toString())
+            if (x == item) isFound = true
+        }
+        while (q.isNotEmpty()) {
+            val y = q.dequeue()
+            this.enqueue(y.toString())
+        }
+        return isFound
+    }
 }
 
 enum class Operator(
     val symbol: String,
     val precedence: Int,
-    val method: (Int, Int) -> Int
+    val method: (BigInteger, BigInteger) -> BigInteger
 ) {
-    PLUS("+", 1, { a: Int, b: Int -> a + b }),
-    MINUS("-", 1, { a: Int, b: Int -> a - b }),
-    MULTIPLY("*", 2, { a: Int, b: Int -> a * b }),
-    DIVIDE("/", 2, { a: Int, b: Int -> a / b }),
-    POWER("^", 3, { a: Int, b: Int -> a.toDouble().pow(b.toDouble()).toInt() }),
-    NULL("", 10, { a: Int, _: Int -> a });
+    PLUS("+", 1, { a: BigInteger, b: BigInteger -> a + b }),
+    MINUS("-", 1, { a: BigInteger, b: BigInteger -> a - b }),
+    MULTIPLY("*", 2, { a: BigInteger, b: BigInteger -> a * b }),
+    DIVIDE("/", 2, { a: BigInteger, b: BigInteger -> a / b }),
+    POWER("^", 3, { a: BigInteger, b: BigInteger -> a.pow(b.toInt()) }),
+    SPACE(" ", 0, { _: BigInteger, _: BigInteger -> throw InvalidExpressionException() } ),
+    NULL("", 10, { _: BigInteger, _: BigInteger -> 0.toBigInteger() });
 
     companion object {
         fun findBySymbol(symbol: String): Operator {
@@ -373,6 +393,80 @@ enum class Operator(
             }
             return NULL
         }
+    }
+}
+
+class MathExpressionTokenizer {
+    private val TT_OPERATOR: Int = 1
+    private val TT_NUMBER: Int = 2
+    private val TT_LEFT_PAR: Int = 3
+    private val TT_RIGHT_PAR: Int = 4
+    private val TT_WORD: Int = 5
+    private val TT_SPACE: Int = 6
+    private val TT_IGNORE = 7
+
+    private val tokenizedExpr = mutableListOf<String>()
+
+    private fun ttype(token: String): Int? {
+        val ttypes = mapOf(
+            "\\+" to TT_OPERATOR,
+            "\\-" to TT_OPERATOR,
+            "\\*" to TT_OPERATOR,
+            "\\/" to TT_OPERATOR,
+            "\\^" to TT_OPERATOR,
+            "[.0-9]" to TT_NUMBER,
+            "[a-zA-Z]" to TT_WORD,
+            "\\(" to TT_LEFT_PAR,
+            "\\)" to TT_RIGHT_PAR,
+            "\\s" to TT_SPACE,
+            "," to TT_IGNORE
+        )
+
+        val tokenType = -1
+        for ((symbol, _) in ttypes) {
+            if (token.matches(symbol.toRegex()))
+                return ttypes[symbol]
+        }
+        return tokenType
+    }
+
+    fun tokenize(expr: String): MutableList<String> {
+        var i = 0
+        var t = ""
+        while (i < expr.length) {
+            var c = expr[i]
+            when {
+                ttype(c.toString()) == TT_OPERATOR -> tokenizedExpr.add(c.toString())
+                ttype(c.toString()) == TT_NUMBER -> {
+                    t += c
+                    while (i + 1 < expr.length && ttype(expr[i + 1].toString()) == TT_NUMBER) {
+                        i += 1
+                        c = expr[i]
+                        t += c
+                    }
+                    tokenizedExpr.add(t)
+                    t = ""
+                }
+                ttype(c.toString()) == TT_WORD -> {
+                    t += c
+                    while (i + 1 < expr.length && ttype(expr[i + 1].toString()) == TT_WORD) {
+                        i += 1
+                        c = expr[i]
+                        t += c
+                    }
+                    tokenizedExpr.add(t)
+                    t = ""
+                }
+                ttype(c.toString()) == TT_SPACE -> tokenizedExpr.add(c.toString())
+                ttype(c.toString()) == TT_LEFT_PAR -> tokenizedExpr.add(c.toString())
+                ttype(c.toString()) == TT_RIGHT_PAR -> tokenizedExpr.add(c.toString())
+                ttype(c.toString()) == TT_IGNORE -> {
+                }
+                else -> throw InvalidExpressionException()
+            }
+            i += 1
+        }
+        return tokenizedExpr
     }
 }
 
